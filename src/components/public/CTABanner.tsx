@@ -155,11 +155,11 @@ export default function CTABanner() {
                 letterSpacing: '-0.03em',
               }}
             >
-              Let&apos;s Find Your
+              Let&apos;s Find Your Family A
               <br />
               <span style={{
-                fontWeight: 300,
-                fontStyle:  'italic',
+                fontWeight: 500,
+                fontStyle:  'normal',
                 background: 'linear-gradient(135deg, #F5E5A8 0%, #C9A84C 50%, #A6832E 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -171,22 +171,24 @@ export default function CTABanner() {
 
             {/* subtitle */}
             <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.35, duration: 0.5 }}
-              style={{
-                fontSize:   isDesktop ? '16px' : '14.5px',
-                lineHeight: 1.65,
-                color:      'rgba(255,255,255,0.6)',
-                margin:     '0 auto 36px',
-                maxWidth:   '520px',
-              }}
-            >
-              Whether you&apos;re looking for your first home, upgrading your
-              lifestyle, or making a smart investment — we&apos;re here to
-              guide every step.
-            </motion.p>
+  initial={{ opacity: 0, y: 12 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ delay: 0.35, duration: 0.5 }}
+  style={{
+    fontSize:   isDesktop ? '16px' : '14.5px',
+    lineHeight: 1.75,
+    color:      'rgba(255,255,255,0.65)',
+    margin:     '0 auto 36px',
+    maxWidth:   '1080px',
+  }}
+>
+  A home is where your family grows, where memories are made, and where
+  every evening feels like coming back to something that&apos;s truly
+  yours. Whether you&apos;re starting a new chapter, giving your loved
+  ones the space they deserve, or building a legacy for the next
+  generation — we&apos;ll walk beside you, every step of the way.
+</motion.p>
 
             {/* CTAs */}
             <motion.div
