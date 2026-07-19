@@ -5,8 +5,8 @@ import FeaturedProperties from '@/components/public/FeaturedProperties'
 import WhyChooseUs from '@/components/public/WhyChooseUs'
 import PropertyTypes from '@/components/public/PropertyTypes'
 import LatestListings from '@/components/public/LatestListings'
+import CTABanner from '@/components/public/CTABanner'
 
-// fetch server side
 async function getData() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -20,7 +20,6 @@ async function getData() {
     }
   )
 
-  // featured
   const featuredQ = supabase
     .from('properties')
     .select('id, title, location, city, price, price_type, bedrooms, bathrooms, area_sqft, property_type, featured, images, video_url')
@@ -29,7 +28,6 @@ async function getData() {
     .order('created_at', { ascending: false })
     .limit(4)
 
-  // latest (any available property, ordered by newest)
   const latestQ = supabase
     .from('properties')
     .select('id, title, location, city, price, price_type, bedrooms, bathrooms, area_sqft, property_type, images, created_at')
@@ -51,6 +49,7 @@ export default async function Home() {
       <WhyChooseUs />
       <PropertyTypes />
       <LatestListings properties={latest} />
+      <CTABanner />
     </main>
   )
 }
