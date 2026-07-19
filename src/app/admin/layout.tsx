@@ -1,5 +1,6 @@
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminTopBar from '@/components/admin/AdminTopBar'
+import AdminShell from '@/components/admin/AdminShell'
 
 export default function AdminLayout({
   children,
@@ -7,20 +8,23 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#F1F5F9]">
-      {/* sidebar */}
+    <div style={{ minHeight: '100vh', backgroundColor: '#F1F5F9' }}>
       <AdminSidebar />
-
-      {/* main area */}
-      <div className="lg:pl-72 min-h-screen flex flex-col">
-        {/* top bar */}
+      <AdminShell>
         <AdminTopBar />
-
-        {/* page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-10">
+        <main
+          style={{
+            flex: 1,
+            width: '100%',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            padding: '32px 20px',
+          }}
+          className="sm:!px-8 lg:!px-12"
+        >
           {children}
         </main>
-      </div>
+      </AdminShell>
     </div>
   )
 }

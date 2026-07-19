@@ -1,24 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Building2,
-  LayoutDashboard,
-  Building,
-  PlusCircle,
-  LogOut,
-  Menu,
-  X,
-  ChevronRight,
+  Building2, LayoutDashboard, Building, PlusCircle,
+  LogOut, Menu, X, ChevronRight, Settings,
 } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'All Properties', href: '/admin/properties', icon: Building },
-  { label: 'Add Property', href: '/admin/properties/add', icon: PlusCircle },
+  { label: 'Dashboard',      href: '/admin/dashboard',      icon: LayoutDashboard },
+  { label: 'All Properties', href: '/admin/properties',     icon: Building        },
+  { label: 'Add Property',   href: '/admin/properties/add', icon: PlusCircle      },
+  { label: 'Settings',       href: '/admin/settings',       icon: Settings        },
 ]
 
 export default function AdminSidebar() {
@@ -26,155 +21,384 @@ export default function AdminSidebar() {
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
-  // handle logout
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
   async function handleLogout() {
     setLoggingOut(true)
     await supabase.auth.signOut()
     router.push('/admin/login')
   }
 
-  // check active
   function isActive(href: string) {
-    if (href === '/admin/dashboard') return pathname === href
+    if (href === '/admin/dashboard')  return pathname === href
+    if (href === '/admin/properties') return pathname === href
     return pathname.startsWith(href)
   }
 
-  // sidebar content (shared between mobile and desktop)
-  const sidebarContent = (
-    <div className="flex flex-col h-full">
+  return (
+    <>
+      {/* mobile hamburger */}
+      {!isDesktop && (
+        <button
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            zIndex: 50,
+            width: '44px',
+            height: '44px',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            border: '1px solid #E2E8F0',
+            cursor: 'pointer',
+          }}
+        >
+          <Menu style={{ width: '20px', height: '20px', color: '#0F1C2E' }} />
+        </button>
+      )}
+
+      {/* desktop sidebar — always in DOM, shown via inline style */}
+      {isDesktop && (
+        <aside
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '280px',
+            height: '100vh',
+            backgroundColor: '#080F1D',
+            display: 'flex',
+            flexDirection: 'column',
+            zIndex: 40,
+            borderRight: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <SidebarInner
+            isActive={isActive}
+            loggingOut={loggingOut}
+            onLogout={handleLogout}
+          />
+        </aside>
+      )}
+
+      {/* mobile drawer */}
+      <AnimatePresence>
+        {mobileOpen && !isDesktop && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 40,
+              }}
+            />
+            <motion.aside
+              key="drawer"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '280px',
+                height: '100vh',
+                backgroundColor: '#080F1D',
+                display: 'flex',
+                flexDirection: 'column',
+                zIndex: 50,
+                borderRight: '1px solid rgba(255,255,255,0.05)',
+              }}
+            >
+              <button
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                style={{
+                  position: 'absolute',
+                  top: '24px',
+                  right: '16px',
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 10,
+                  cursor: 'pointer',
+                  border: 'none',
+                }}
+              >
+                <X style={{ width: '16px', height: '16px', color: 'rgba(255,255,255,0.4)' }} />
+              </button>
+              <SidebarInner
+                isActive={isActive}
+                loggingOut={loggingOut}
+                onLogout={handleLogout}
+              />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+function SidebarInner({
+  isActive,
+  loggingOut,
+  onLogout,
+}: {
+  isActive: (href: string) => boolean
+  loggingOut: boolean
+  onLogout: () => void
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
       {/* logo */}
-      <div className="px-8 py-8">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-gradient-to-br from-[#C9A84C] to-[#B8943F] rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A84C]/20">
-            <Building2 className="w-5 h-5 text-white" />
+      <div style={{ padding: '28px 24px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, #C9A84C 0%, #A6832E 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 20px rgba(201,168,76,0.25)',
+              flexShrink: 0,
+            }}
+          >
+            <Building2 style={{ width: '20px', height: '20px', color: '#fff' }} />
           </div>
           <div>
-            <h2 className="text-white font-bold text-base tracking-tight">Estate Manager</h2>
-            <p className="text-[#C9A84C]/60 text-[11px] font-medium tracking-wide">ADMIN PANEL</p>
+            <p style={{ color: '#fff', fontWeight: 700, fontSize: '14px', lineHeight: 1.2, margin: 0 }}>
+              Estate Manager
+            </p>
+            <p
+              style={{
+                color: 'rgba(201,168,76,0.6)',
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                marginTop: '4px',
+              }}
+            >
+              Admin Panel
+            </p>
           </div>
         </div>
       </div>
 
       {/* divider */}
-      <div className="mx-6 h-px bg-white/[0.06]" />
+      <div
+        style={{
+          margin: '0 24px',
+          height: '1px',
+          background: 'linear-gradient(90deg, rgba(255,255,255,0.06), transparent)',
+        }}
+      />
 
-      {/* label */}
-      <div className="px-8 pt-8 pb-3">
-        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Menu</p>
+      {/* nav label */}
+      <div style={{ padding: '24px 24px 12px' }}>
+        <p
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.2)',
+          }}
+        >
+          Navigation
+        </p>
       </div>
 
-      {/* nav links */}
-      <nav className="flex-1 px-5 space-y-1">
-        {navItems.map((item, index) => {
+      {/* nav items */}
+      <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {navItems.map((item) => {
           const active = isActive(item.href)
           return (
-            <motion.a
+            <a
               key={item.href}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              className={`
-                flex items-center justify-between px-4 py-3.5 rounded-xl text-[13px] font-medium
-                transition-all duration-200 group relative overflow-hidden
-                ${active
-                  ? 'bg-gradient-to-r from-[#C9A84C] to-[#B8943F] text-white shadow-lg shadow-[#C9A84C]/20'
-                  : 'text-white/40 hover:bg-white/[0.04] hover:text-white/80'
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                fontSize: '13px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                background: active
+                  ? 'linear-gradient(135deg, #C9A84C 0%, #B8943F 100%)'
+                  : 'transparent',
+                boxShadow: active ? '0 4px 16px rgba(201,168,76,0.25)' : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.8)'
                 }
-              `}
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+                }
+              }}
             >
-              <div className="flex items-center gap-3 z-10">
-                <item.icon className={`w-[18px] h-[18px] ${active ? 'text-white' : 'text-white/30 group-hover:text-white/60'} transition-colors duration-200`} />
-                <span>{item.label}</span>
-              </div>
-              {active && <ChevronRight className="w-4 h-4 text-white/60" />}
-            </motion.a>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <item.icon
+                  style={{
+                    width: '17px',
+                    height: '17px',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.35)',
+                  }}
+                />
+                {item.label}
+              </span>
+              {active && (
+                <ChevronRight style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.6)' }} />
+              )}
+            </a>
           )
         })}
       </nav>
 
       {/* bottom */}
-      <div className="px-5 pb-6 space-y-2">
-        <div className="mx-1 h-px bg-white/[0.06] mb-4" />
+      <div style={{ padding: '0 12px 24px', marginTop: '8px' }}>
+        <div
+          style={{
+            margin: '0 12px 16px',
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(255,255,255,0.06), transparent)',
+          }}
+        />
 
         {/* user card */}
-        <div className="bg-white/[0.03] rounded-xl px-4 py-4 mb-2">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#C9A84C] to-[#B8943F] rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">D</span>
+        <div
+          style={{
+            borderRadius: '16px',
+            padding: '14px 16px',
+            marginBottom: '8px',
+            backgroundColor: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #C9A84C 0%, #A6832E 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(201,168,76,0.2)',
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ color: '#fff', fontSize: '12px', fontWeight: 700 }}>D</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-semibold truncate">Demo Admin</p>
-              <p className="text-white/25 text-[10px] truncate">demo@estatemanager.com</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p
+                style={{
+                  color: '#fff',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Demo Admin
+              </p>
+              <p
+                style={{
+                  color: 'rgba(255,255,255,0.3)',
+                  fontSize: '11px',
+                  marginTop: '2px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                demo@estatemanager.com
+              </p>
             </div>
           </div>
         </div>
 
         {/* logout */}
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           disabled={loggingOut}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-medium text-white/30 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            fontWeight: 500,
+            width: '100%',
+            color: 'rgba(255,255,255,0.3)',
+            background: 'transparent',
+            border: 'none',
+            cursor: loggingOut ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s',
+            opacity: loggingOut ? 0.6 : 1,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'
+            e.currentTarget.style.color = '#F87171'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.3)'
+          }}
         >
-          <LogOut className="w-[18px] h-[18px]" />
-          <span>{loggingOut ? 'Signing out...' : 'Sign Out'}</span>
+          <LogOut style={{ width: '16px', height: '16px' }} />
+          {loggingOut ? 'Signing out…' : 'Sign Out'}
         </button>
       </div>
     </div>
-  )
-
-  return (
-    <>
-      {/* mobile hamburger */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-5 left-5 z-50 w-11 h-11 bg-white border border-gray-200 rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200"
-      >
-        <Menu className="w-5 h-5 text-[#0F1C2E]" />
-      </button>
-
-      {/* desktop sidebar */}
-      <aside className="hidden lg:block fixed top-0 left-0 w-72 h-screen bg-[#0A1628] z-40">
-        {sidebarContent}
-      </aside>
-
-      {/* mobile sidebar */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            {/* overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-            />
-
-            {/* mobile sidebar */}
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed top-0 left-0 w-72 h-screen bg-[#0A1628] z-50"
-            >
-              {/* close button */}
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="absolute top-6 right-5 w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors duration-200"
-              >
-                <X className="w-4 h-4 text-white/40" />
-              </button>
-
-              {sidebarContent}
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </>
   )
 }
