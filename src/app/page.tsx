@@ -6,6 +6,7 @@ import WhyChooseUs from '@/components/public/WhyChooseUs'
 import PropertyTypes from '@/components/public/PropertyTypes'
 import LatestListings from '@/components/public/LatestListings'
 import CTABanner from '@/components/public/CTABanner'
+import Footer from '@/components/public/Footer'
 
 async function getData() {
   const cookieStore = await cookies()
@@ -50,6 +51,7 @@ export default async function Home() {
       <PropertyTypes />
       <LatestListings properties={latest} />
       <CTABanner />
+      <Footer />
     </main>
   )
 }
