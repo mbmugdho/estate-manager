@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   MapPin, Bed, Bath, Ruler, ChevronRight,
   PlayCircle, Heart,
 } from 'lucide-react'
+import { toggleSave, isSavedByVisitor } from '@/lib/visitor'
 
 // shared type
 export interface PropertyCardData {
@@ -57,10 +58,31 @@ export default function PropertyCard({
   const [hovered,    setHovered]    = useState(false)
   const [imgHovered, setImgHovered] = useState(false)
   const [saved,      setSaved]      = useState(false)
+  const [saveLoading, setSaveLoading] = useState(false)
+  const checkedRef = useRef(false)
 
   const image    = property.images?.[0] ?? 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80'
   const hasVideo = !!property.video_url
   const featured = !!property.featured
+
+  // check saved state on mount
+  useEffect(() => {
+    if (checkedRef.current) return
+    checkedRef.current = true
+    isSavedByVisitor(property.id).then(setSaved)
+  }, [property.id])
+
+  // handle save toggle
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (saveLoading) return
+    setSaveLoading(true)
+    const next = !saved
+    setSaved(next) // optimistic
+    const actual = await toggleSave(property.id, !next)
+    setSaved(actual) // correct if DB disagreed
+    setSaveLoading(false)
+  }
 
   return (
     <motion.div
@@ -115,7 +137,7 @@ export default function PropertyCard({
 
       {/* image */}
       <div
-        style={{ position: 'relative', height: '220px', overflow: 'hidden', backgroundColor: '#0F1C2E' }}
+        style={{ position: 'relative', height: '240px', overflow: 'hidden', backgroundColor: '#0F1C2E' }}
         onMouseEnter={() => setImgHovered(true)}
         onMouseLeave={() => setImgHovered(false)}
       >
@@ -132,10 +154,12 @@ export default function PropertyCard({
             transition: 'transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}
         />
+
+        {/* gradient overlay — richer depth */}
         <div style={{
           position:      'absolute',
           inset:         0,
-          background:    'linear-gradient(to top, rgba(15,28,46,0.5) 0%, transparent 50%)',
+          background:    'linear-gradient(to top, rgba(15,28,46,0.6) 0%, rgba(15,28,46,0.1) 40%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
@@ -170,7 +194,7 @@ export default function PropertyCard({
           <div style={{
             position:        'absolute',
             top:             '14px',
-            left:            featured ? '100px' : '14px',
+            left:            featured ? '108px' : '14px',
             display:         'flex',
             alignItems:      'center',
             gap:             '5px',
@@ -185,49 +209,80 @@ export default function PropertyCard({
           </div>
         )}
 
-        {/* save button */}
-        <button
-          onClick={e => { e.stopPropagation(); setSaved(s => !s) }}
+        {/* save button — wired to DB */}
+        <motion.button
+          onClick={handleSave}
+          whileTap={{ scale: 1.25 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           style={{
             position:        'absolute',
             top:             '12px',
             right:           '12px',
-            width:           '34px',
-            height:          '34px',
+            width:           '36px',
+            height:          '36px',
             borderRadius:    '999px',
-            backgroundColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: saved ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.15)',
             backdropFilter:  'blur(8px)',
-            border:          '1px solid rgba(255,255,255,0.25)',
+            border:          saved ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,255,255,0.25)',
             display:         'flex',
             alignItems:      'center',
             justifyContent:  'center',
             cursor:          'pointer',
-            transition:      'all 0.2s',
+            transition:      'all 0.25s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)' }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)' }}
+          onMouseEnter={e => {
+            if (!saved) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)'
+          }}
+          onMouseLeave={e => {
+            if (!saved) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'
+          }}
         >
           <Heart style={{
-            width:  '14px',
-            height: '14px',
-            color:  saved ? '#EF4444' : '#fff',
-            fill:   saved ? '#EF4444' : 'none',
-            transition: 'all 0.2s',
+            width:      '15px',
+            height:     '15px',
+            color:      saved ? '#EF4444' : '#fff',
+            fill:       saved ? '#EF4444' : 'none',
+            transition: 'all 0.25s',
+            filter:     saved ? 'drop-shadow(0 0 4px rgba(239,68,68,0.4))' : 'none',
           }} />
-        </button>
+        </motion.button>
+
+        {/* price chip on image — premium overlay */}
+        <div style={{
+          position:        'absolute',
+          bottom:          '12px',
+          right:           '14px',
+          padding:         '6px 14px',
+          borderRadius:    '10px',
+          backgroundColor: 'rgba(15,28,46,0.8)',
+          backdropFilter:  'blur(12px)',
+          border:          '1px solid rgba(201,168,76,0.2)',
+        }}>
+          <span style={{
+            fontSize:      '15px',
+            fontWeight:    800,
+            color:         '#C9A84C',
+            letterSpacing: '-0.01em',
+          }}>
+            {formatPrice(property.price)}
+            {property.price_type === 'rent' && (
+              <span style={{ fontSize: '10px', fontWeight: 500, color: 'rgba(201,168,76,0.6)', marginLeft: '2px' }}>/mo</span>
+            )}
+          </span>
+        </div>
 
         {/* type chip */}
         <div style={{
           position:        'absolute',
           bottom:          '12px',
           left:            '14px',
-          padding:         '4px 10px',
-          borderRadius:    '6px',
+          padding:         '5px 11px',
+          borderRadius:    '8px',
           backgroundColor: 'rgba(15,28,46,0.7)',
           backdropFilter:  'blur(8px)',
           border:          '1px solid rgba(255,255,255,0.1)',
         }}>
-          <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>
+          <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.03em' }}>
             {typeLabel(property.property_type)}
           </span>
         </div>
@@ -235,6 +290,7 @@ export default function PropertyCard({
 
       {/* body */}
       <div style={{ padding: '18px 20px 20px 22px' }}>
+        {/* location row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
           <MapPin style={{ width: '11px', height: '11px', color: '#C9A84C', flexShrink: 0 }} />
           <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 500 }}>
@@ -242,8 +298,9 @@ export default function PropertyCard({
           </span>
         </div>
 
+        {/* title */}
         <h3 style={{
-          fontSize:        '15px',
+          fontSize:        '15.5px',
           fontWeight:      700,
           color:           '#0F1C2E',
           lineHeight:      1.3,
@@ -252,65 +309,52 @@ export default function PropertyCard({
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
           overflow:        'hidden',
+          letterSpacing:   '-0.01em',
         }}>
           {cleanTitle(property.title)}
         </h3>
 
+        {/* specs row */}
         <div style={{
           display:       'flex',
           alignItems:    'center',
           paddingBottom: '14px',
           marginBottom:  '14px',
           borderBottom:  '1px solid #F1F5F9',
+          gap:           '4px',
         }}>
           {property.bedrooms != null && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginRight: '16px' }}>
-              <Bed style={{ width: '13px', height: '13px', color: '#9CA3AF' }} />
-              <span style={{ fontSize: '12px', color: '#374151', fontWeight: 600 }}>{property.bedrooms}</span>
-              <span style={{ fontSize: '11px', color: '#9CA3AF' }}>Bed</span>
-            </div>
+            <SpecChip icon={<Bed style={{ width: '13px', height: '13px', color: '#C9A84C' }} />} value={`${property.bedrooms}`} label="Bed" />
           )}
+          {property.bedrooms != null && property.bathrooms != null && <SpecDot />}
           {property.bathrooms != null && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginRight: '16px' }}>
-              <Bath style={{ width: '13px', height: '13px', color: '#9CA3AF' }} />
-              <span style={{ fontSize: '12px', color: '#374151', fontWeight: 600 }}>{property.bathrooms}</span>
-              <span style={{ fontSize: '11px', color: '#9CA3AF' }}>Bath</span>
-            </div>
+            <SpecChip icon={<Bath style={{ width: '13px', height: '13px', color: '#C9A84C' }} />} value={`${property.bathrooms}`} label="Bath" />
           )}
+          {(property.bedrooms != null || property.bathrooms != null) && property.area_sqft != null && <SpecDot />}
           {property.area_sqft != null && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Ruler style={{ width: '13px', height: '13px', color: '#9CA3AF' }} />
-              <span style={{ fontSize: '12px', color: '#374151', fontWeight: 600 }}>
-                {new Intl.NumberFormat('en-IN').format(property.area_sqft)}
-              </span>
-              <span style={{ fontSize: '11px', color: '#9CA3AF' }}>sqft</span>
-            </div>
+            <SpecChip icon={<Ruler style={{ width: '13px', height: '13px', color: '#C9A84C' }} />} value={new Intl.NumberFormat('en-IN').format(property.area_sqft)} label="sqft" />
           )}
         </div>
 
+        {/* bottom row — sale type label + view button */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{
               fontSize:      '10px',
-              fontWeight:    600,
-              color:         '#9CA3AF',
+              fontWeight:    700,
+              color:         '#C9A84C',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom:  '3px',
+              letterSpacing: '0.1em',
+              marginBottom:  '2px',
             }}>
-              {property.price_type === 'rent' ? 'Monthly Rent' : 'Sale Price'}
+              {property.price_type === 'rent' ? 'For Rent' : 'For Sale'}
             </div>
             <div style={{
-              fontSize:      '20px',
-              fontWeight:    800,
-              color:         '#0F1C2E',
-              letterSpacing: '-0.02em',
-              lineHeight:    1,
+              fontSize:      '11px',
+              color:         '#9CA3AF',
+              fontWeight:    500,
             }}>
-              {formatPrice(property.price)}
-              {property.price_type === 'rent' && (
-                <span style={{ fontSize: '11px', fontWeight: 500, color: '#9CA3AF', marginLeft: '4px' }}>/mo</span>
-              )}
+              {property.location ?? property.city}
             </div>
           </div>
 
@@ -318,19 +362,50 @@ export default function PropertyCard({
             display:         'flex',
             alignItems:      'center',
             gap:             '6px',
-            padding:         '10px 16px',
+            padding:         '10px 18px',
             borderRadius:    '12px',
             backgroundColor: hovered ? '#0F1C2E' : '#F8FAFC',
             border:          hovered ? '1px solid #0F1C2E' : '1px solid #E2E8F0',
             transition:      'all 0.3s',
           }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: hovered ? '#C9A84C' : '#374151' }}>
-              View
+              Details
             </span>
-            <ChevronRight style={{ width: '13px', height: '13px', color: hovered ? '#C9A84C' : '#9CA3AF' }} />
+            <ChevronRight style={{
+              width:      '13px',
+              height:     '13px',
+              color:      hovered ? '#C9A84C' : '#9CA3AF',
+              transform:  hovered ? 'translateX(2px)' : 'translateX(0)',
+              transition: 'all 0.3s',
+            }} />
           </div>
         </div>
       </div>
     </motion.div>
+  )
+}
+
+// spec chip sub-component
+function SpecChip({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      {icon}
+      <span style={{ fontSize: '12.5px', color: '#0F1C2E', fontWeight: 700 }}>{value}</span>
+      <span style={{ fontSize: '10.5px', color: '#9CA3AF', fontWeight: 500 }}>{label}</span>
+    </div>
+  )
+}
+
+// dot separator
+function SpecDot() {
+  return (
+    <div style={{
+      width:        '3px',
+      height:       '3px',
+      borderRadius: '999px',
+      backgroundColor: '#CBD5E1',
+      margin:       '0 8px',
+      flexShrink:   0,
+    }} />
   )
 }

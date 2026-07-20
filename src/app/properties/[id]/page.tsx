@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import PropertyDetailClient from './PropertyDetailClient'
+import Navbar from '@/components/public/Navbar'
+import Footer from '@/components/public/Footer'
 
 // full property type for detail page
 export interface PropertyDetail {
@@ -144,15 +146,18 @@ export default async function PropertyDetailPage({
   const { id } = await params
   const property = await getProperty(id)
 
-  // hide archived or missing properties from public
   if (!property || property.status === 'archived') notFound()
 
   const similar = await getSimilar(property)
 
   return (
-    <PropertyDetailClient
-      property={property}
-      similar={similar}
-    />
+    <>
+      <Navbar />
+      <PropertyDetailClient
+        property={property}
+        similar={similar}
+      />
+      <Footer />
+    </>
   )
 }

@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Building2, LayoutDashboard, Building, PlusCircle,
-  LogOut, Menu, X, ChevronRight, Settings,
+  LogOut, Menu, X, ChevronRight, Settings, ExternalLink,
 } from 'lucide-react'
 
 const navItems = [
@@ -299,6 +299,53 @@ function SidebarInner({
           )
         })}
       </nav>
+
+      {/* view site link */}
+      <div style={{ padding: '0 12px', marginTop: '8px' }}>
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            fontWeight: 600,
+            textDecoration: 'none',
+            color: 'rgba(255,255,255,0.4)',
+            backgroundColor: 'transparent',
+            border: '1px dashed rgba(255,255,255,0.08)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'rgba(201,168,76,0.08)'
+            e.currentTarget.style.color = '#C9A84C'
+            e.currentTarget.style.borderColor = 'rgba(201,168,76,0.2)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ExternalLink style={{ width: '17px', height: '17px' }} />
+            View Live Site
+          </span>
+          <span style={{
+            fontSize: '9px', fontWeight: 700, color: '#C9A84C',
+            backgroundColor: 'rgba(201,168,76,0.1)',
+            padding: '2px 6px', borderRadius: '4px',
+            letterSpacing: '0.08em',
+          }}>
+            NEW TAB
+          </span>
+        </a>
+      </div>
+
 
       {/* bottom */}
       <div style={{ padding: '0 12px 24px', marginTop: '8px' }}>

@@ -9,8 +9,8 @@ import { Menu, X, Phone, ChevronDown } from 'lucide-react'
 const NAV_LINKS = [
   { label: 'Home',       href: '/'            },
   { label: 'Properties', href: '/properties'  },
-  { label: 'About',      href: '/#about'      },
-  { label: 'Contact',    href: '/#contact'    },
+  { label: 'About',      href: '/about'      },
+  { label: 'Contact',    href: '/contact'    },
 ]
 
 const WHATSAPP = '+8801575871170'

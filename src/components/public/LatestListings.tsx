@@ -389,6 +389,7 @@ export default function LatestListings({ properties }: { properties: Property[] 
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
+                paddingRight: '8px',
               }}>
                 This Season
               </span>

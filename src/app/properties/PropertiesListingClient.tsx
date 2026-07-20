@@ -216,6 +216,7 @@ export default function PropertiesListingClient({ properties }: { properties: Pr
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              paddingRight: '6px',
             }}>
               Properties
             </span>

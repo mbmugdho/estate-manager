@@ -9,8 +9,7 @@ import {
   Share2, Eye, Calendar, ChevronLeft, ChevronRight,
   PlaySquare, X, Copy, Check, MessageCircle,
 } from 'lucide-react'
-import Navbar from '@/components/public/Navbar'
-import Footer from '@/components/public/Footer'
+
 import PropertyCard, { type PropertyCardData } from '@/components/public/PropertyCard'
 import {
   getVisitorId, logView, logInquiry,
@@ -422,7 +421,7 @@ export default function PropertyDetailClient({ property, similar }: Props) {
 
   return (
     <>
-      <Navbar />
+      
 
       {/* lightbox */}
       <AnimatePresence>
@@ -499,7 +498,7 @@ export default function PropertyDetailClient({ property, similar }: Props) {
 
       {/* page wrapper */}
       <div style={{ backgroundColor: '#F1F5F9', minHeight: '100vh' }}>
-        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: isMobile ? '16px 16px 100px' : '32px 32px 64px' }}>
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: isMobile ? '80px 16px 100px' : '96px 32px 64px' }}>
 
           {/* breadcrumb */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '24px', flexWrap: 'wrap' }}>
@@ -665,33 +664,49 @@ export default function PropertyDetailClient({ property, similar }: Props) {
 
               {/* property details */}
               <SectionCard title="Property Details">
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '0' }}>
-                  {[
-                    { label: 'Reference',      value: property.reference_code },
-                    { label: 'Property Type',  value: typeLabel(property.property_type) },
-                    { label: 'Status',         value: statInfo.label },
-                    { label: 'City',           value: property.city },
-                    ...(property.location    ? [{ label: 'Location',   value: property.location }]   : []),
-                    ...(property.bedrooms   != null ? [{ label: 'Bedrooms',  value: `${property.bedrooms}` }]  : []),
-                    ...(property.bathrooms  != null ? [{ label: 'Bathrooms', value: `${property.bathrooms}` }] : []),
-                    ...(property.area_sqft  != null ? [{ label: 'Area',      value: `${new Intl.NumberFormat('en-IN').format(property.area_sqft)} sqft` }] : []),
-                    { label: 'Price',          value: formatPrice(property.price, property.price_type) },
-                    { label: 'Listed',         value: timeAgo(property.created_at) },
-                  ].map((row, i, arr) => (
-                    <div
-                      key={row.label}
-                      style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '12px 0',
-                        borderBottom: i < arr.length - 1 ? '1px solid #F1F5F9' : 'none',
-                      }}
-                    >
-                      <span style={{ fontSize: '13px', color: '#9CA3AF', fontWeight: 500 }}>{row.label}</span>
-                      <span style={{ fontSize: '13px', color: '#0F1C2E', fontWeight: 700 }}>{row.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </SectionCard>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+      rowGap: '4px',
+      columnGap: isMobile ? '0' : '24px',
+    }}
+  >
+    {[
+      { label: 'Reference', value: property.reference_code },
+      { label: 'Property Type', value: typeLabel(property.property_type) },
+      { label: 'Status', value: statInfo.label },
+      { label: 'City', value: property.city },
+      ...(property.location ? [{ label: 'Location', value: property.location }] : []),
+      ...(property.bedrooms != null ? [{ label: 'Bedrooms', value: `${property.bedrooms}` }] : []),
+      ...(property.bathrooms != null ? [{ label: 'Bathrooms', value: `${property.bathrooms}` }] : []),
+      ...(property.area_sqft != null
+        ? [{ label: 'Area', value: `${new Intl.NumberFormat('en-IN').format(property.area_sqft)} sqft` }]
+        : []),
+      { label: 'Price', value: formatPrice(property.price, property.price_type) },
+      { label: 'Listed', value: timeAgo(property.created_at) },
+    ].map((row, i, arr) => (
+      <div
+        key={row.label}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '14px 0',
+          borderBottom: i < arr.length - 1 ? '1px solid #F1F5F9' : 'none',
+          gap: '16px',
+        }}
+      >
+        <span style={{ fontSize: '13px', color: '#9CA3AF', fontWeight: 500 }}>
+          {row.label}
+        </span>
+        <span style={{ fontSize: '13px', color: '#0F1C2E', fontWeight: 700, textAlign: 'right' }}>
+          {row.value}
+        </span>
+      </div>
+    ))}
+  </div>
+</SectionCard>
 
               {/* location */}
               {property.address && (
@@ -820,7 +835,7 @@ export default function PropertyDetailClient({ property, similar }: Props) {
         </div>
       )}
 
-      <Footer />
+      
     </>
   )
 }

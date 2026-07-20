@@ -159,11 +159,12 @@ export default function CTABanner() {
               <br />
               <span style={{
                 fontWeight: 500,
-                fontStyle:  'normal',
+                fontStyle:  'italic',
                 background: 'linear-gradient(135deg, #F5E5A8 0%, #C9A84C 50%, #A6832E 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
+                paddingRight: '6px',
               }}>
                 Perfect Space
               </span>

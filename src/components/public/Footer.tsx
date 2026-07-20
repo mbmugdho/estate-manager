@@ -209,10 +209,10 @@ export default async function Footer() {
               <Link href="/properties" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
                 Properties
               </Link>
-              <Link href="/#about" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
+              <Link href="/about" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
                 About
               </Link>
-              <Link href="/#contact" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
+              <Link href="/contact" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
                 Contact
               </Link>
             </div>
@@ -292,17 +292,6 @@ export default async function Footer() {
         </div>
       </div>
 
-      {/* <style jsx>{`
-        .footerLink:hover {
-          color: rgba(201,168,76,0.95) !important;
-        }
-        .footerSocial:hover {
-          transform: translateY(-2px);
-          border-color: rgba(201,168,76,0.35);
-          background-color: rgba(255,255,255,0.10);
-          color: rgba(201,168,76,0.95);
-        }
-      `}</style> */}
     </footer>
   )
 }

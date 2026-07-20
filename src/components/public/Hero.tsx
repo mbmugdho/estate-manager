@@ -12,7 +12,7 @@ const STATS = [
   { icon: Building2, value: '500+',    label: 'Properties Built' },
   { icon: Award,     value: '65',      label: 'Iconic Projects'  },
   { icon: Ruler,     value: '2,279K+', label: 'Sq.Ft Delivered'  },
-  { icon: Sparkles,  value: '25 yrs',  label: 'Excellence'       },
+  { icon: Sparkles,  value: '26+ years',  label: 'Excellence'       },
   { icon: Users,     value: '1,200+',  label: 'Happy Families'   },
 ]
 
@@ -204,6 +204,7 @@ export default function Hero() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              paddingBottom: '6px',
               marginTop: '4px',
             }}>
               Shaping Skylines.
