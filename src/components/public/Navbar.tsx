@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Phone, ChevronDown } from 'lucide-react'
@@ -41,6 +43,21 @@ export default function Navbar() {
   }, [mobileOpen])
 
   useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  // logo from settings
+const [logoUrl, setLogoUrl] = useState<string | null>(null)
+const logoChecked = useRef(false)
+
+useEffect(() => {
+  if (logoChecked.current) return
+  logoChecked.current = true
+  supabase
+    .from('settings')
+    .select('logo_url')
+    .limit(1)
+    .maybeSingle()
+    .then(({ data }) => { if (data?.logo_url) setLogoUrl(data.logo_url) })
+}, [])
 
   const isHeroPage = pathname === '/'
 
@@ -87,11 +104,23 @@ export default function Navbar() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
                 width: '36px', height: '36px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, #C9A84C 0%, #A6832E 100%)',
+                background: logoUrl ? 'transparent' : 'linear-gradient(135deg, #C9A84C 0%, #A6832E 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0, boxShadow: '0 4px 12px rgba(201,168,76,0.35)',
+                flexShrink: 0, overflow: 'hidden',
+                boxShadow: logoUrl ? 'none' : '0 4px 12px rgba(201,168,76,0.35)',
               }}>
-                <span style={{ color: '#fff', fontSize: '15px', fontWeight: 800, letterSpacing: '-0.5px' }}>E</span>
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt="Logo"
+                    width={36}
+                    height={36}
+                    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+                    unoptimized
+                  />
+                ) : (
+                  <span style={{ color: '#fff', fontSize: '15px', fontWeight: 800, letterSpacing: '-0.5px' }}>E</span>
+                )}
               </div>
               <div>
                 <div style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 700, lineHeight: 1, letterSpacing: '-0.2px' }}>

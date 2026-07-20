@@ -226,7 +226,7 @@ export default async function Footer() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <a href={`tel:${phone}`} className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
-                {phone}
+                {/* {phone} */}
               </a>
               <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noopener noreferrer" className="footerLink" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 600 }}>
                 WhatsApp: {whatsapp}
@@ -279,11 +279,11 @@ export default async function Footer() {
             href="/admin/login"
             className="footerLink"
             style={{
-              fontSize: '12px',
+              fontSize: '10px',
               color: 'rgba(255,255,255,0.32)',
               textDecoration: 'none',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
+              fontWeight: 600,
+              letterSpacing: '0.2em',
               textTransform: 'uppercase',
             }}
           >
